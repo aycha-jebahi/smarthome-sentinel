@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36310.24
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotnetWebProject1", "DotnetWebProject1\DotnetWebProject1.csproj", "{1740AA70-B4B3-44AF-9BD1-5080AA6F59A9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHomeSentinel.Tests", "SmartHomeSentinel.Tests\SmartHomeSentinel.Tests.csproj", "{756DF22E-A259-41BD-BA6E-67F5D2DF0F19}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Éléments de solution", "Éléments de solution", "{9C8CB701-102D-CF49-A3E0-89AC09D42C2C}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose.yml = docker-compose.yml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1740AA70-B4B3-44AF-9BD1-5080AA6F59A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1740AA70-B4B3-44AF-9BD1-5080AA6F59A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1740AA70-B4B3-44AF-9BD1-5080AA6F59A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1740AA70-B4B3-44AF-9BD1-5080AA6F59A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{756DF22E-A259-41BD-BA6E-67F5D2DF0F19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{756DF22E-A259-41BD-BA6E-67F5D2DF0F19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{756DF22E-A259-41BD-BA6E-67F5D2DF0F19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{756DF22E-A259-41BD-BA6E-67F5D2DF0F19}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {32066B75-D2E3-43EB-BADB-0F22A15EE788}
+	EndGlobalSection
+EndGlobal

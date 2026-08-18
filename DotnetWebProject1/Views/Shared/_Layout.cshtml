@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SmartHome Sentinel</title>
+    <style>
+        body {
+            font-family: Segoe UI, Arial, sans-serif;
+            margin: 24px;
+            background: #f5f6fa;
+            color: #222;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background: white;
+            margin-top: 12px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #2d3748;
+            color: white;
+        }
+
+        .anomalyRow {
+            background-color: #ffe0e0;
+        }
+
+        ul {
+            background: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+        }
+
+        li {
+            margin-bottom: 6px;
+            color: #b91c1c;
+        }
+
+        h1 {
+            color: #2d3748;
+        }
+    </style>
+</head>
+<body>
+    @RenderBody()
+
+    <!-- Chargement local depuis wwwroot/js/knockout.js -->
+    <script src="~/js/knockout.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

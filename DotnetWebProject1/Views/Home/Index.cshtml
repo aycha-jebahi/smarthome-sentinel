@@ -1,0 +1,243 @@
+﻿@{
+    Layout = "_Layout";
+}
+
+<!-- CDN Chart.js pour le graphique -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    body {
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        background-color: #f4f6f9;
+        color: #333;
+        margin: 0;
+        padding: 24px;
+    }
+
+    .dashboard-header {
+        margin-bottom: 24px;
+    }
+
+        .dashboard-header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: #1e293b;
+        }
+
+    .card {
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        padding: 20px;
+        margin-bottom: 24px;
+        border: 1px solid #e2e8f0;
+    }
+
+        .card h2 {
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-size: 1.25rem;
+            color: #334155;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 8px;
+        }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f8fafc;
+        color: #64748b;
+        font-weight: 600;
+        padding: 12px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    td {
+        padding: 12px;
+        border-bottom: 1px solid #edf2f7;
+    }
+
+    tr.anomalyRow {
+        background-color: #fef2f2;
+        color: #991b1b;
+        font-weight: 500;
+    }
+
+    ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    li {
+        padding: 10px 14px;
+        margin-bottom: 8px;
+        background-color: #fff5f5;
+        border-left: 4px solid #ef4444;
+        border-radius: 4px;
+        color: #991b1b;
+        font-size: 0.95rem;
+    }
+</style>
+
+<div class="dashboard-header">
+    <h1>SmartHome Sentinel — Supervision en temps réel</h1>
+</div>
+
+<div class="card">
+    <h2>Évolution de la Télémétrie en Direct</h2>
+    <p style="color:#64748b; font-size:0.85rem; margin-top:-8px;">
+        Chaque capteur a sa propre échelle — survolez un point pour voir la valeur exacte.
+    </p>
+    <div style="height: 300px; position: relative;">
+        <canvas id="telemetryChart"></canvas>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Dernières lectures</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Capteur</th>
+                <th>Type</th>
+                <th>Valeur</th>
+                <th>Heure</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody data-bind="foreach: readings">
+            <tr data-bind="css: { anomalyRow: isAnomaly }">
+                <td data-bind="text: sensorName"></td>
+                <td data-bind="text: sensorType"></td>
+                <td data-bind="text: value"></td>
+                <td data-bind="text: new Date(timestamp).toLocaleTimeString()"></td>
+                <td data-bind="text: isAnomaly ? 'ANOMALIE' : 'OK'"></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h2>Anomalies récentes</h2>
+    <ul data-bind="foreach: anomalies">
+        <li data-bind="text: sensorName + ' — ' + reason"></li>
+    </ul>
+</div>
+
+@section Scripts {
+    <script>
+        // Config visuelle + échelle propre à chaque type de capteur
+        const sensorConfig = {
+            Temperature:    { color: '#3b82f6', label: 'Température (°C)' },
+            Electricity:    { color: '#f59e0b', label: 'Consommation (W)' },
+            Humidity:       { color: '#10b981', label: 'Humidité (%)' },
+            NetworkLatency: { color: '#ef4444', label: 'Latence réseau (ms)' }
+        };
+
+        const ctx = document.getElementById('telemetryChart').getContext('2d');
+
+        const telemetryChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: Object.keys(sensorConfig).map(type => ({
+                    label: sensorConfig[type].label,
+                    sensorType: type, // propriété perso, ignorée par Chart.js
+                    data: [],
+                    borderColor: sensorConfig[type].color,
+                    backgroundColor: sensorConfig[type].color + '20',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: false,
+                    spanGaps: true,   // relie les points malgré les "trous" (autres capteurs entre-temps)
+                    pointRadius: 3,
+                    yAxisID: 'y_' + type
+                }))
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'nearest', intersect: false },
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => `${ctx.dataset.label}: ${ctx.formattedValue}`
+                        }
+                    }
+                },
+                scales: Object.fromEntries(
+                    Object.keys(sensorConfig).map(type => [
+                        'y_' + type,
+                        { display: false, beginAtZero: true } // axes cachés : chaque courbe garde sa propre échelle sans encombrer le graphique
+                    ])
+                )
+            }
+        });
+
+        const MAX_POINTS = 20;
+
+        function addChartPoint(reading) {
+            if (telemetryChart.data.labels.length >= MAX_POINTS) {
+                telemetryChart.data.labels.shift();
+                telemetryChart.data.datasets.forEach(ds => ds.data.shift());
+            }
+
+            telemetryChart.data.labels.push(new Date(reading.timestamp).toLocaleTimeString());
+
+            telemetryChart.data.datasets.forEach(ds => {
+                // Seule la courbe du bon capteur reçoit la valeur, les autres reçoivent "null" (pas de point, grâce à spanGaps)
+                ds.data.push(ds.sensorType === reading.sensorType ? reading.value : null);
+            });
+
+            telemetryChart.update();
+        }
+
+        function DashboardViewModel() {
+            var self = this;
+            self.readings = ko.observableArray([]);
+            self.anomalies = ko.observableArray([]);
+
+            fetch('/api/readings/latest?take=20')
+                .then(r => r.json())
+                .then(data => {
+                    self.readings(data);
+                    var reversed = data.slice().reverse();
+                    reversed.forEach(r => addChartPoint(r));
+                })
+                .catch(err => console.error('Erreur chargement lectures:', err));
+
+            fetch('/api/anomalies?take=20')
+                .then(r => r.json())
+                .then(data => self.anomalies(data))
+                .catch(err => console.error('Erreur chargement anomalies:', err));
+
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/hubs/anomaly")
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on("NewReading", function (reading) {
+                self.readings.unshift(reading);
+                if (self.readings().length > 20) self.readings.splice(20);
+                addChartPoint(reading);
+            });
+
+            connection.on("NewAnomaly", function (anomaly) {
+                self.anomalies.unshift(anomaly);
+                if (self.anomalies().length > 20) self.anomalies.splice(20);
+            });
+
+            connection.start().catch(err => console.error('Erreur SignalR:', err));
+        }
+
+        ko.applyBindings(new DashboardViewModel());
+    </script>
+}
